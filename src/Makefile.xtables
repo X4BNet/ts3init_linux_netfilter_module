@@ -1,3 +1,4 @@
+CC ?= gcc
 CFLAGS = -O2 -Wall
 LIBS = libxt_ts3init.so libxt_ts3init_get_cookie.so libxt_ts3init_get_puzzle.so libxt_TS3INIT_RESET.so libxt_TS3INIT_SET_COOKIE.so libxt_TS3INIT_GET_COOKIE.so
 all: $(LIBS)
@@ -18,8 +19,8 @@ install:
 	fi
 
 lib%.so: lib%.o
-	gcc -shared -fPIC -o $@ $^ -lxtables;
+	$(CC) -shared -fPIC -o $@ $^ -lxtables;
 
 lib%.o: lib%.c
-	gcc ${CFLAGS} -D_INIT=lib$*_init -fPIC -c -o $@ $<;
+	$(CC) ${CFLAGS} -D_INIT=lib$*_init -fPIC -c -o $@ $<;
 
