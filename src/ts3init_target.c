@@ -98,8 +98,10 @@ ts3init_send_ipv6_reply(struct sk_buff *oldskb, const struct xt_action_param *pa
     
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,10,0)
     security_skb_classify_flow((struct sk_buff *)oldskb, flowi6_to_flowi(&fl));
-#else
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
     security_skb_classify_flow((struct sk_buff *)oldskb, (struct flowi *)&fl);
+#else
+    security_skb_classify_flow((struct sk_buff *)oldskb, flowi6_to_flowi_common(&fl));
 #endif
     
     dst = ip6_route_output(net, NULL, &fl);
