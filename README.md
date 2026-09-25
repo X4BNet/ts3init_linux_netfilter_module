@@ -43,6 +43,16 @@ sudo depmod -a
 sudo modprobe xt_ts3init
 ```
 
+`make install` registers, builds, and installs `xt_ts3init` through DKMS, then
+installs the xtables userspace libraries directly. To target a kernel other
+than the running kernel, pass `KVER`, for example:
+
+```
+sudo make KVER=6.12.109 install
+```
+
+Use `sudo make dkms-uninstall` to remove the current source version from DKMS.
+
 Protocol background and module description
 ==========================================
 When a TeamSpeak 3 client attempts to connect to a TeamSpeak 3 server, it sends
@@ -206,4 +216,3 @@ The authorized_ft set keeps a list of authorized ip addresses (not ports). Only
 these ip addresses are allowed to send traffic to the file transfer
 port. Since there is no way to know in advance what source port the TeamSpeak 3
 client is going to use for file transfer, this is the best we can do.
-
