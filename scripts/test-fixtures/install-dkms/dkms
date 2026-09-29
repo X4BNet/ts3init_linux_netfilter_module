@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+command=$1; shift
+printf '%s %s\n' "$command" "$*" >> "$MOCK_DKMS_LOG"
+case "$command" in
+  status)
+    if [[ -d "$MOCK_DKMS_STATE" && "$MOCK_HIDE_STATUS" != true ]]; then
+      found=false
+      for kernel_file in "$MOCK_DKMS_STATE"/kernels/*; do [[ -e "$kernel_file" ]] || continue; found=true; printf '%s/%s, %s, x86_64: installed\n' "$MOCK_MODULE_NAME" "$MOCK_MODULE_VERSION" "${kernel_file##*/}"; done
+      [[ "$found" == true ]] || printf '%s/%s: added\n' "$MOCK_MODULE_NAME" "$MOCK_MODULE_VERSION"
+    fi ;;
+  remove)
+    if [[ "${2:-}" == --all ]]; then rm -rf "$MOCK_DKMS_STATE"; else
+      [[ "${2:-}" == -k ]]; test -d "$MOCK_DKMS_STATE" || exit 3; test -f "$MOCK_DKMS_STATE/kernels/$3" || exit 3; test -f "$MOCK_SOURCE_DIR/old-source"
+      rm -f "$MOCK_DKMS_STATE/kernels/$3"; compgen -G "$MOCK_DKMS_STATE/kernels/*" >/dev/null || rm -rf "$MOCK_DKMS_STATE"
+    fi ;;
+  add) [[ ! -d "$MOCK_DKMS_STATE" ]] || exit 3; mkdir -p "$MOCK_DKMS_STATE/kernels" ;;
+  build) test -d "$MOCK_DKMS_STATE"; test -f "$MOCK_SOURCE_DIR/dkms.conf" ;;
+  install) mkdir -p "$MOCK_DKMS_STATE/kernels"; touch "$MOCK_DKMS_STATE/kernels/$3" ;;
+  *) exit 2 ;;
+esac
