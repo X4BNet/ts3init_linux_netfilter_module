@@ -1,0 +1,30 @@
+- hosts: filtering
+  become: yes
+  vars:
+    module_dir: /tmp/xt-ts3init-local-build
+  tasks:
+    - name: install build and test dependencies
+      apt:
+        name: [build-essential, dkms, iptables, libxtables-dev]
+        state: present
+        update_cache: yes
+    - name: replace guest build directory
+      file:
+        path: "{{ module_dir }}"
+        state: absent
+    - name: copy module source to guest
+      shell: >
+        tar -C /module-src -cf - Makefile dkms.conf install-dkms.sh version.sh src test scripts/qemu |
+        sshpass -p '{{ ansible_ssh_pass }}' ssh -o StrictHostKeyChecking=no
+        {{ ansible_user }}@{{ inventory_hostname }}
+        "sudo mkdir -p {{ module_dir }} && sudo tar -xf - -C {{ module_dir }}"
+      delegate_to: localhost
+    - name: build, install, and load module
+      shell: |
+        set -euo pipefail
+        KVERSION="$(uname -r)" ./install-dkms.sh --install
+        make -C src -f Makefile.xtables install
+        modprobe xt_ts3init
+      args:
+        executable: /bin/bash
+        chdir: "{{ module_dir }}"

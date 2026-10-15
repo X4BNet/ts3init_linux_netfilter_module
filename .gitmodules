@@ -1,0 +1,3 @@
+[submodule "ci/kernel-module-ci"]
+	path = ci/kernel-module-ci
+	url = https://github.com/X4BNet/kernel-module-ci.git

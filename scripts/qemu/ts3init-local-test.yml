@@ -1,0 +1,20 @@
+- hosts: filtering
+  become: yes
+  vars:
+    module_dir: /tmp/xt-ts3init-local-build
+  tasks:
+    - name: run algorithm tests and verify parser and reload behavior
+      shell: |
+        set -euo pipefail
+        make -C test
+        ./test/test_siphash
+        iptables -m ts3init --help >/dev/null
+        iptables -m ts3init_get_cookie --help >/dev/null
+        iptables -m ts3init_get_puzzle --help >/dev/null
+        iptables -j TS3INIT_GET_COOKIE --help >/dev/null
+        iptables -j TS3INIT_RESET --help >/dev/null
+        modprobe -r xt_ts3init
+        modprobe xt_ts3init
+      args:
+        executable: /bin/bash
+        chdir: "{{ module_dir }}"

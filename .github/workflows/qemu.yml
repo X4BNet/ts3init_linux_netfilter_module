@@ -1,0 +1,34 @@
+name: xt_ts3init QEMU
+
+on:
+  push:
+  schedule:
+    - cron: "45 11 * * 0"
+  workflow_dispatch:
+
+concurrency: xt-ts3init-qemu
+
+jobs:
+  qemu:
+    runs-on: [self-hosted, linux, x4b, vmip]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+      - name: Test DKMS installer lifecycle
+        run: ./scripts/test-install-dkms.sh
+      - name: Checkout kernel-module-ci
+        uses: actions/checkout@v6
+        with:
+          repository: X4BNet/kernel-module-ci
+          ref: main
+          path: ci/kernel-module-ci
+          ssh-key: ${{ secrets.KERNEL_MODULE_CI_DEPLOY_KEY }}
+      - name: Install QEMU host dependencies
+        run: sudo apt-get update && sudo apt-get install -y coreutils iproute2 python3 sudo
+      - name: Allow sudo in runner
+        run: echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+      - name: Log in to Docker Hub
+        run: echo '${{ secrets.dockerhub_token }}' | docker login -u x4bnet --password-stdin
+      - name: Run QEMU tests
+        run: ./scripts/test-qemu.sh --skip-local-build

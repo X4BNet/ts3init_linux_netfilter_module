@@ -33,7 +33,8 @@ while IFS= read -r old_version; do
     [[ -z "$old_version" || "$old_version" == "$module_version" ]] && continue
     dkms remove "$module_name/$old_version" --all
     rm -rf "$source_root/$module_name-$old_version"
-done < <(dkms status "$module_name" 2>/dev/null | sed -n "s#^$module_name/\\([^,:]*\\).*#\\1#p")
+done < <(dkms status "$module_name" 2>/dev/null |
+	sed -n "s#^$module_name/\\([^,:]*\\).*#\\1#p" | sort -u)
 
 # Remove the target build while the registered source tree still exists.
 dkms remove "$module_name/$module_version" -k "$target_kernel" >/dev/null 2>&1 || true
