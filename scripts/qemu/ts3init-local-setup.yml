@@ -23,6 +23,7 @@
       shell: |
         set -euo pipefail
         KVERSION="$(uname -r)" ./install-dkms.sh --install
+        make -C src -f Makefile.xtables
         make -C src -f Makefile.xtables install
         modprobe xt_ts3init
       args:
